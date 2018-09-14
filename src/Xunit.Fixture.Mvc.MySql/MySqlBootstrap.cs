@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Xunit.Fixture.Mvc.MySql
 {
@@ -18,10 +19,13 @@ namespace Xunit.Fixture.Mvc.MySql
         public async Task BootstrapAsync()
         {
             await _context.Database.EnsureDeletedAsync();
-            await _context.Database.EnsureCreatedAsync();
+            await _context.Database.MigrateAsync();
 
-            await _context.AddRangeAsync(_data.Data);
-            await _context.SaveChangesAsync();
+            if (_data.Data.Any())
+            {
+                await _context.AddRangeAsync(_data.Data);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

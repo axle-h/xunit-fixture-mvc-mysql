@@ -18,12 +18,13 @@ namespace Breakfast.Api.Tests.Extensions
                                                                                                                         };
 
         public static IMvcFunctionalTestFixture ShouldReturnBreakfastItem(this IMvcFunctionalTestFixture fixture, BreakfastItem expected) =>
-            fixture.JsonResultShould<BreakfastItem>(r => r.Id.Should().Be(expected.Id),
+            fixture.ShouldReturnJson<BreakfastItem>(r => r.Id.Should().Be(expected.Id),
                                                     r => r.Name.Should().Be(expected.Name),
                                                     r => r.Rating.Should().Be(expected.Rating));
 
         public static IMvcFunctionalTestFixture ShouldReturnBreakfastItems(this IMvcFunctionalTestFixture fixture, ICollection<BreakfastItem> expected) =>
-            fixture.JsonResultShould<ICollection<BreakfastItem>>(rs => rs.Should().HaveSameCount(expected)
+            fixture.ShouldReturnJson<ICollection<BreakfastItem>>(rs => rs.Should()
+                                                                         .HaveSameCount(expected)
                                                                          .And.HaveEquivalentProperty(expected, x => x.Id)
                                                                          .And.HaveEquivalentProperty(expected, x => x.Name)
                                                                          .And.HaveEquivalentProperty(expected, x => x.Rating));
