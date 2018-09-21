@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Xunit.Fixture.Mvc.MySql
 {
@@ -29,18 +27,22 @@ namespace Xunit.Fixture.Mvc.MySql
                 Type currentType = null;
                 while (data.MoveNext())
                 {
-                    if (currentType != null && currentType != data.Current.type)
+                    if (data.Current == null)
+                    {
+                        continue;
+                    }
+
+                    if (currentType != null && currentType != data.Current.GetType())
                     {
                         await _context.SaveChangesAsync();
                     }
 
-                    currentType = data.Current.type;
-                    await _context.AddAsync(data.Current.entity);
+                    currentType = data.Current.GetType();
+                    await _context.AddAsync(data.Current);
                 }
 
                 await _context.SaveChangesAsync();
             }
-
         }
     }
 }
