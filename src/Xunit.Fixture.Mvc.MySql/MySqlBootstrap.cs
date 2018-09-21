@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 
@@ -21,11 +23,24 @@ namespace Xunit.Fixture.Mvc.MySql
             await _context.Database.EnsureDeletedAsync();
             await _context.Database.MigrateAsync();
 
-            if (_data.Data.Any())
+            // Add all in turn but group adjacent entities of the same type together.
+            using (var data = _data.Data.GetEnumerator())
             {
-                await _context.AddRangeAsync(_data.Data);
+                Type currentType = null;
+                while (data.MoveNext())
+                {
+                    if (currentType != null && currentType != data.Current.type)
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+
+                    currentType = data.Current.type;
+                    await _context.AddAsync(data.Current.entity);
+                }
+
                 await _context.SaveChangesAsync();
             }
+
         }
     }
 }
