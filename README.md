@@ -3,27 +3,23 @@
 
 # xunit-fixture-mvc-mysql
 
-MVC functional tests with a fixture pattern for a MySql database on EF Core.
+MVC functional tests with a fixture pattern built on top of [xunit-fixture-mvc](https://github.com/axle-h/xunit-fixture-mvc) and extended for a MySql database on EF Core.
 
 For example:
 
 ```C#
 [Fact]
-public void When_creating_breakfast_item()
-{
-    using (var fixture = new MvcFunctionalTestFixture<Startup>(_output))
-    {
-        var request = new CreateOrUpdateBreakfastItemRequest { Name = "bacon", Rating = 10 };
-        fixture.HavingMySqlDatabase<BreakfastContext>()
-               .WhenCreating("BreakfastItem", request)
-               .ShouldReturnSuccessfulStatus()
-               .JsonResultShould<BreakfastItem>(r => r.Id.Should().Be(1),
-                                                r => r.Name.Should().Be(request.Name),
-                                                r => r.Rating.Should().Be(request.Rating)
-               .ShouldExistInDatabase<BreakfastContext, BreakfastItem>(1,
-                                                x => x.Id.Should().Be(1),
-                                                x => existing.Name.Should().Be(request.Name),
-                                                x => x.Rating.Should().Be(request.Rating));
-    }
-}
+public Task When_creating_breakfast_item() =>
+    new MvcFunctionalTestFixture<Startup>(_output)
+        .HavingMySqlDatabase<BreakfastContext>()
+        .WhenCreating("BreakfastItem", out CreateOrUpdateBreakfastItemRequest request)
+        .ShouldReturnSuccessfulStatus()
+        .JsonResultShould<BreakfastItem>(r => r.Id.Should().Be(1),
+                                         r => r.Name.Should().Be(request.Name),
+                                         r => r.Rating.Should().Be(request.Rating))
+        .ShouldExistInDatabase<BreakfastContext, BreakfastItem>(1,
+                                        x => x.Id.Should().Be(1),
+                                        x => existing.Name.Should().Be(request.Name),
+                                        x => x.Rating.Should().Be(request.Rating))
+        .RunAsync();
 ```
